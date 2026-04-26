@@ -1,0 +1,17 @@
+services:
+  retrieval_bot:
+    image: dog_waste_retrieval:latest
+    container_name: version_0p3
+    volumes:
+      - .:/home/ros_user/project
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /mnt/wslg:/mnt/wslg
+    environment:
+      - DISPLAY=:0
+      - LIBGL_ALWAYS_SOFTWARE=1
+    # This runs our new script on startup
+    entrypoint: /home/ros_user/project/entrypoint.sh
+    command: bash # Keeps the container open
+    network_mode: "host"
+    stdin_open: true
+    tty: true
