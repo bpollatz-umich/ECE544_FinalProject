@@ -2,9 +2,9 @@ function rrtPath = rrtPlanner(startPos,goalPos,displayPath,field)
 arguments
     startPos (1,3) double = [2,2,0] % x, y, theta
     goalPos (1,3) double = startPos % x, y, theta
+    obstacles (:,4) double = [1,0,0,0.1] % [ID, Cx, Cy, S]
+    wsBounds (2,2) double = [0,50;0,50]  % [xmin, xmax; ymin, ymax]
     displayPath (1,1) logical = false % true to generate figures
-    field.obstacles (:,4) double = [1,0,0,0.1] % [ID, Cx, Cy, S]
-    field.wsBounds (2,2) double = [0,50;0,50]  % [xmin, xmax; ymin, ymax]
 end % arg
 
 %% Initialize
@@ -29,8 +29,8 @@ while(looping && currNode < maxNodes)
     % value from the rand function, and get a point (x,y) within the workspace
     % range. This is set up dynamically, allowing workspace to be adjusted in
     % future.
-    newTarget = [(field.wsBounds(1,2)-field.wsBounds(1,1))*rand()+field.wsBounds(1,1), ...
-        (field.wsBounds(2,2)-field.wsBounds(2,1))*rand()+field.wsBounds(2,1),...
+    newTarget = [(wsBounds(1,2)-wsBounds(1,1))*rand()+wsBounds(1,1), ...
+        (wsBounds(2,2)-wsBounds(2,1))*rand()+wsBounds(2,1),...
         2*pi*rand()-pi]; % random x,y,heading, heading ranges +/- pi
     %% 2. Nearest Node
 
@@ -57,7 +57,7 @@ while(looping && currNode < maxNodes)
     % Using the provided function from lecture under HelperFunctions. Steps
     % 5-8 are nested in order to prevent executing further steps if node is
     % rejected.
-    collisionFlg = checkCollide(newNode(1:2),gTree(bestNode,1:2),field.obstacles,field.wsBounds);
+    collisionFlg = checkCollide(newNode(1:2),gTree(bestNode,1:2),obstacles,wsBounds);
     if(~collisionFlg)
         gTree(currNode,1:3) = newNode;
         %gTree(currNode,4) = bestNode;
@@ -89,7 +89,7 @@ while(looping && currNode < maxNodes)
             if(newScore == inf) % no parent found
                 looping2 = false;
                 collisionFlg = true; % reject this
-            elseif(~checkCollide(neighborRadius(newParentIdx,2:3),newNode(1:2),field.obstacles,field.wsBounds))
+            elseif(~checkCollide(neighborRadius(newParentIdx,2:3),newNode(1:2),obstacles,wsBounds))
                 looping2 = false;
             else
                 neighborRadius(newParentIdx,5) = inf;
@@ -106,7 +106,7 @@ while(looping && currNode < maxNodes)
             for idx = 1:size(neighborRadius,1)
                 propScore = newScore + norm(neighborRadius(idx,2:3)-newNode(1:2));
                 if(neighborRadius(idx,4) > propScore && ...
-                        ~checkCollide(neighborRadius(idx,2:3),newNode(1:2),field.obstacles,field.wsBounds))
+                        ~checkCollide(neighborRadius(idx,2:3),newNode(1:2),obstacles,wsBounds))
                     gTree(neighborRadius(idx,1),4:5) = [currNode,propScore];
                 end % if
             end % for
@@ -144,7 +144,7 @@ dx = diff(xvar);
 dy = diff(yvar);
 tvar = atan2(dy,dx);
 tvar = [tvar tvar(end)]; % fixes truncation of last point
-rrtPath = [xvar',yvar',tvar'];
+rrtPath = [xvar,yvar,tvar];
 
 %% Display Results
 if(displayPath)
@@ -158,8 +158,8 @@ if(displayPath)
 
     % Obstacle Plotting:
     % The "rectangle" function is used as previously used in lecture 8 - must translate to lower left corner, then w/h is same:
-    for k = 1:size(field.obstacles,1)
-        rectangle('Position', [field.obstacles(k,2)-(field.obstacles(k,4)/2),field.obstacles(k,3)-(field.obstacles(k,4)/2),field.obstacles(k,4),field.obstacles(k,4)],...
+    for k = 1:size(obstacles,1)
+        rectangle('Position', [obstacles(k,2)-(obstacles(k,4)/2),obstacles(k,3)-(obstacles(k,4)/2),obstacles(k,4),obstacles(k,4)],...
             'FaceColor', [0.2 0.2 0.2], 'EdgeColor', 'k');
     end % for
 
