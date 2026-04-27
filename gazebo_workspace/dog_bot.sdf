@@ -81,25 +81,38 @@
     <!-- 1. Joint State Publisher -->
     <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"/>
 
-    <!-- 2. Drive Controllers (Rear Wheels) -->
-    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-      <joint_name>rl_drive_j</joint_name>
-      <sub_topic>joint/rl_drive_j/cmd_vel</sub_topic>
-    </plugin>
-    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-      <joint_name>rr_drive_j</joint_name>
-      <sub_topic>joint/rr_drive_j/cmd_vel</sub_topic>
-    </plugin>
+    <!-- 2. Ackermann Drive Controllers -->
+<plugin
+  filename="gz-sim-ackermann-steering-system"
+  name="gz::sim::systems::AckermannSteering">
+  <left_steering_joint>fl_steer_j</left_steering_joint>
+  <right_steering_joint>fr_steer_j</right_steering_joint>
+  <left_wheel_joint>rl_drive_j</left_wheel_joint>
+  <right_wheel_joint>rr_drive_j</right_wheel_joint>
+  <wheel_separation>0.7</wheel_separation>
+  <wheelbase>0.8</wheelbase>
+  <wheel_radius>0.2</wheel_radius>
+  <min_velocity>-10.0</min_velocity>
+  <max_velocity>10.0</max_velocity>
+  <min_steering_angle>-0.6</min_steering_angle>
+  <max_steering_angle>0.6</max_steering_angle>
+<max_linear_acceleration>100</max_linear_acceleration>
+<max_angular_acceleration>100</max_angular_acceleration>
+  <!-- These define the internal Gazebo topics -->
+  <topic>/model/dog_bot/cmd_vel</topic>
+  <odom_topic>/model/dog_bot/odometry</odom_topic>
+  <tf_topic>/model/dog_bot/tf</tf_topic>
+  <frame_id>odom</frame_id>
+  <child_frame_id>chassis</child_frame_id>
+</plugin>
 
-    <!-- 3. Steering Controllers (Front Hinge Pivot) -->
-    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-      <joint_name>fl_steer_j</joint_name>
-      <sub_topic>joint/fl_steer_j/cmd_vel</sub_topic>
-    </plugin>
-    <plugin filename="gz-sim-joint-controller-system" name="gz::sim::systems::JointController">
-      <joint_name>fr_steer_j</joint_name>
-      <sub_topic>joint/fr_steer_j/cmd_vel</sub_topic>
-    </plugin>
+<plugin
+  filename="gz-sim-odometry-publisher-system"
+  name="gz::sim::systems::OdometryPublisher">
+  <odom_frame>odom</odom_frame>
+  <robot_base_frame>chassis</robot_base_frame>
+  <odom_topic>/model/dog_bot/odometry</odom_topic>
+</plugin>
 
   </model>
 </sdf>
